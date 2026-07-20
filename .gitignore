@@ -1,0 +1,32 @@
+# Dependencies and builds
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Vercel and Supabase local state
+.vercel/
+.supabase/
+supabase/.temp/
+
+# Logs and editor files
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# R session files
+.Rhistory
+.RData
+
+# Local data and exports
+data/private/
+exports/
+*.dump
+*.sql.gz

@@ -1,0 +1,4 @@
+interface:
+  display_name: "UC 산학협력단 대시보드"
+  short_description: "산학협력단 성과관리 대시보드 설계·구현 가이드"
+  default_prompt: "Use $uc-industry-dashboard to design or implement the UC 산학협력단 성과관리 대시보드."
