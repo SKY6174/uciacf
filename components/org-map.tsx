@@ -6,14 +6,11 @@ import { ArrowLeft, Network } from "lucide-react";
 /**
  * 울산과학대학교 산학협력단 통합 성과관리 대시보드 - 조직·사업 맵 컴포넌트
  * 
- * 직선 커넥터가 픽셀 단위로 카드의 정확한 중앙에 밀착되도록 마크업을 표준 트리 노드 구조로 개정했습니다.
- * 이 구조는 CSS 가상 요소를 이용해 가로/세로 연결선이 자동 정렬 및 결합되어 절대 끊어지지 않도록 설계되었습니다.
- * 
- * [계층 정의]
- * 1. 최상위(단장) -> `org-tree-wrapper` 아래 첫 번째 노드
- * 2. 2단계(부단장 / 본부장) -> `org-children-row` 내의 `org-child-col` 2개 열
- * 3. 3단계(대분류 부서) -> 각 리더 노드 하위의 `org-children-row` 및 `org-child-col`들
- * 4. 체인 구조(센터 및 일반 사업단) -> 각 대분류 노드 아래의 세로 체인(`org-chain-row`)
+ * 사용자 피드백을 기반으로 아래 변경 사항을 정밀 반영하였습니다:
+ * 1. 동구/남구/북구 어린이∙사회복지급식센터 명칭에 줄바꿈(<br />) 및 지정 점 기호(∙) 적용.
+ * 2. 하위 센터들 간의 상하관계 수직선(org-chain-connector) 제거 및 조밀하게 간격 압축.
+ * 3. 산학협력단장과 하위 리더(부단장, 본부장, 국책사업단) 사이의 여백을 2.5배(64px) 넓히기 위해 l1-children-row 적용.
+ * 4. 국책사업단을 산학협력단장 직속(Level 2)으로 승격 및 점선(dashed-branch)으로 연결.
  */
 export function OrgMap() {
   return (
@@ -26,7 +23,7 @@ export function OrgMap() {
             <span>ORGANIZATION & PROGRAM MAP</span>
           </div>
           <h1>조직·사업 맵</h1>
-          <p>울산과학대학교 산학협력단의 세부 조직 및 운영 중인 국책사업단의 계층 구조입니다. (연결선 정렬 완료)</p>
+          <p>울산과학대학교 산학협력단의 세부 조직 및 운영 중인 국책사업단의 계층 구조입니다. (레이아웃 보완 완료)</p>
         </div>
       </section>
 
@@ -46,12 +43,12 @@ export function OrgMap() {
               </div>
             </div>
 
-            {/* [2단계 자식들] 부단장, 본부장 세트 */}
-            <div className="org-children-row">
+            {/* [2단계 자식들] 부단장, 본부장, 국책사업단 세트 (l1-children-row 적용으로 수직 여백 2.5배 확대) */}
+            <div className="org-children-row l1-children-row">
               {/* 단장 바로 밑으로 내려오는 부모용 수직선 */}
               <div className="org-parent-connector"></div>
 
-              {/* 자식 1: 산학협력부단장 지부 */}
+              {/* 자식 1: 산학협력부단장 지부 (L2) */}
               <div className="org-child-col">
                 <div className="org-node leader-node orange-border">
                   <span className="node-badge orange-badge">리더</span>
@@ -70,17 +67,15 @@ export function OrgMap() {
                       <h4>학교기업</h4>
                     </div>
 
-                    {/* 수직 체인 구조 */}
+                    {/* 수직 목록 구조 (카드 사이의 수직선 제거) */}
                     <div className="org-chain-row">
-                      <div className="org-chain-connector"></div>
+                      <div className="org-chain-connector"></div> {/* 대분류와 연결용 수직선 1개만 유지 */}
                       <div className="org-node center-node blue-border">
                         <h5>종합환경분석센터</h5>
                       </div>
-                      <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>영상컨텐츠제작센터</h5>
                       </div>
-                      <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>스포츠재활운동센터</h5>
                       </div>
@@ -98,13 +93,12 @@ export function OrgMap() {
                       <h4>연구소</h4>
                     </div>
 
-                    {/* 수직 체인 구조 */}
+                    {/* 수직 목록 구조 */}
                     <div className="org-chain-row">
                       <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>지역혁신연구소</h5>
                       </div>
-                      <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>이차전지연구소</h5>
                       </div>
@@ -121,17 +115,15 @@ export function OrgMap() {
                       <h4>부속기관</h4>
                     </div>
 
-                    {/* 수직 체인 구조 */}
+                    {/* 수직 목록 구조 */}
                     <div className="org-chain-row">
                       <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>현장실습지원센터</h5>
                       </div>
-                      <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>창업창직교육센터</h5>
                       </div>
-                      <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>울산광역시탄소중립지원센터</h5>
                       </div>
@@ -157,7 +149,7 @@ export function OrgMap() {
                 </div>
               </div>
 
-              {/* 자식 2: 기업인재교육본부장 지부 */}
+              {/* 자식 2: 기업인재교육본부장 지부 (L2) */}
               <div className="org-child-col">
                 <div className="org-node leader-node orange-border">
                   <span className="node-badge orange-badge">리더</span>
@@ -165,7 +157,7 @@ export function OrgMap() {
                   <p className="node-sub">교육본부 및 국책사업 총괄</p>
                 </div>
 
-                {/* [3단계 자식들] 본부장 산하 3개 대분류 */}
+                {/* [3단계 자식들] 본부장 산하 2개 대분류 (국책사업단은 L2로 승격) */}
                 <div className="org-children-row">
                   <div className="org-parent-connector"></div>
 
@@ -176,28 +168,26 @@ export function OrgMap() {
                       <h4>사업기구</h4>
                     </div>
 
-                    {/* 수직 체인 구조 */}
+                    {/* 수직 목록 구조 */}
                     <div className="org-chain-row">
                       <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>어린이급식관리사업단</h5>
                       </div>
-                      <div className="org-chain-connector"></div>
                       
                       {/* 병렬 급식지원센터 목록 (보라색 점선 상자) */}
                       <div className="parallel-list-container">
                         <div className="parallel-list-node violet-border">
-                          <h6>동구어린이·사회복지급식센터</h6>
+                          <h6>동구<br />어린이∙사회복지급식센터</h6>
                         </div>
                         <div className="parallel-list-node violet-border">
-                          <h6>남구어린이·사회복지급식센터</h6>
+                          <h6>남구<br />어린이∙사회복지급식센터</h6>
                         </div>
                         <div className="parallel-list-node violet-border">
-                          <h6>북구어린이·사회복지급식센터</h6>
+                          <h6>북구<br />어린이∙사회복지급식센터</h6>
                         </div>
                       </div>
 
-                      <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>간호시뮬레이션센터</h5>
                       </div>
@@ -211,63 +201,61 @@ export function OrgMap() {
                       <h4>기업인재교육본부</h4>
                     </div>
 
-                    {/* 수직 체인 구조 */}
+                    {/* 수직 목록 구조 */}
                     <div className="org-chain-row">
                       <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>일학습병행제사업단</h5>
                       </div>
-                      <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>고교단계통합공동훈련센터</h5>
                       </div>
-                      <div className="org-chain-connector"></div>
                       <div className="org-node center-node blue-border">
                         <h5>지역산업맞춤형인력양성사업단</h5>
                       </div>
                     </div>
                   </div>
 
-                  {/* 3) 국책사업단 (8개 사업단 세로 리스트) */}
-                  <div className="org-child-col">
-                    <div className="org-node dept-node green-border">
-                      <span className="node-badge green-badge">대분류</span>
-                      <h4>국책사업단</h4>
-                    </div>
+                </div>
+              </div>
 
-                    <div className="org-chain-row">
-                      <div className="org-chain-connector"></div>
-                      
-                      {/* 8개 국책사업단 세로 목록 박스 */}
-                      <div className="vertical-project-list">
-                        <div className="project-list-node teal-border">
-                          <span>차세대통신혁신융합대학사업단(NCCOSS)</span>
-                        </div>
-                        <div className="project-list-node teal-border">
-                          <span>첨단산업인재양성부트캠프사업단</span>
-                        </div>
-                        <div className="project-list-node teal-border">
-                          <span>기술사관육성사업단</span>
-                        </div>
-                        <div className="project-list-node teal-border">
-                          <span>창업교육혁신사업단(SCOUT)</span>
-                        </div>
-                        <div className="project-list-node teal-border">
-                          <span>육아교육보육혁신사업단</span>
-                        </div>
-                        <div className="project-list-node teal-border">
-                          <span>전문대학혁신지원사업단</span>
-                        </div>
-                        <div className="project-list-node teal-border">
-                          <span>AID전환중점전문대학지원사업단</span>
-                        </div>
-                        <div className="project-list-node teal-border">
-                          <span>RISE사업단</span>
-                        </div>
-                      </div>
+              {/* 자식 3: 국책사업단 지부 (L2 승격 & 점선 브랜치 적용) */}
+              <div className="org-child-col dashed-branch">
+                <div className="org-node dept-node green-border">
+                  <span className="node-badge green-badge">대분류</span>
+                  <h4>국책사업단</h4>
+                </div>
+
+                <div className="org-chain-row">
+                  <div className="org-chain-connector"></div>
+                  
+                  {/* 8개 국책사업단 세로 목록 박스 */}
+                  <div className="vertical-project-list">
+                    <div className="project-list-node teal-border">
+                      <span>차세대통신혁신융합대학사업단(NCCOSS)</span>
+                    </div>
+                    <div className="project-list-node teal-border">
+                      <span>첨단산업인재양성부트캠프사업단</span>
+                    </div>
+                    <div className="project-list-node teal-border">
+                      <span>기술사관육성사업단</span>
+                    </div>
+                    <div className="project-list-node teal-border">
+                      <span>창업교육혁신사업단(SCOUT)</span>
+                    </div>
+                    <div className="project-list-node teal-border">
+                      <span>육아교육보육혁신사업단</span>
+                    </div>
+                    <div className="project-list-node teal-border">
+                      <span>전문대학혁신지원사업단</span>
+                    </div>
+                    <div className="project-list-node teal-border">
+                      <span>AID전환중점전문대학지원사업단</span>
+                    </div>
+                    <div className="project-list-node teal-border">
+                      <span>RISE사업단</span>
                     </div>
                   </div>
-
                 </div>
               </div>
 

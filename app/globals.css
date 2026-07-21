@@ -306,7 +306,7 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 1550px;
+  min-width: 1800px; /* 3개 대형 지부의 균형 배치를 위해 최소 너비를 1800px로 조절 */
   margin: 0 auto;
   position: relative;
 }
@@ -340,6 +340,11 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   width: 100%;
 }
 
+/* 3번 피드백: 단장과 하위 리더 사이의 수직 간격을 약 2.5배(64px)로 대폭 넓힙니다. */
+.org-children-row.l1-children-row {
+  padding-top: 64px !important;
+}
+
 /* 부모 노드 아래로 수평선까지 내려가는 수직선 */
 .org-parent-connector {
   position: absolute;
@@ -350,6 +355,10 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   background-color: var(--line);
   transform: translateX(-50%);
   z-index: 1;
+}
+
+.l1-children-row > .org-parent-connector {
+  height: 64px !important;
 }
 
 /* 개별 자식 열 (Column) */
@@ -375,6 +384,11 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   z-index: 1;
 }
 
+.l1-children-row > .org-child-col::before {
+  top: -64px !important;
+  height: 64px !important;
+}
+
 /* 자식 열들의 머리 위를 가로지르는 수평 가로선 */
 .org-child-col::after {
   content: "";
@@ -385,6 +399,10 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   height: 2px;
   background-color: var(--line);
   z-index: 1;
+}
+
+.l1-children-row > .org-child-col::after {
+  top: -64px !important;
 }
 
 /* 첫 번째 자식의 왼쪽 가로선 제거 */
@@ -404,22 +422,44 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
 }
 
 /* ==========================================================================
+   4번 피드백: 국책사업단 (L2) - 단장과의 점선(Dashed) 연결선 구현
+   ========================================================================== */
+
+/* 국책사업단 수직 연결선을 점선으로 오버라이드 */
+.org-child-col.dashed-branch::before {
+  background-color: transparent !important;
+  border-left: 2px dashed rgba(21, 143, 143, 0.6) !important;
+  width: 0 !important;
+  transform: translateX(-50%);
+}
+
+/* 본부장 ➡️ 국책사업단 구간의 수평 가로선을 점선으로 오버라이드 */
+.org-child-col.dashed-branch::after {
+  background-color: transparent !important;
+  border-top: 2px dashed rgba(21, 143, 143, 0.6) !important;
+  height: 0 !important;
+}
+
+/* ==========================================================================
    세로 체인 및 리스트 구조
    ========================================================================== */
 
-/* 세로로 이어지는 체인형 레이아웃 */
+/* 세로로 이어지는 소속 센터 레이아웃 */
 .org-chain-row {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  /* 2번 피드백: 상하관계가 아닌 동일 범주의 기관이므로 수직선을 없애고 카드 간격을 8px로 좁힙니다. */
+  gap: 8px;
 }
 
-/* 체인 노드 사이를 정확히 메워주는 세로 직선 */
+/* 대분류 부서와 소속 센터 리스트를 연결하는 맨 위의 수직선 1개 */
 .org-chain-connector {
   width: 2px;
-  height: 24px;
+  height: 20px;
   background-color: var(--line);
+  margin-bottom: 4px;
 }
 
 /* ==========================================================================
@@ -493,6 +533,7 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   font-size: 10px;
   font-weight: 600;
   color: var(--ink);
+  line-height: 1.4; /* 1번 피드백: 개행 적용에 맞춰 넉넉한 텍스트 줄간격 확보 */
 }
 
 .node-sub {
