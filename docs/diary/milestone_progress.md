@@ -27,3 +27,10 @@
 * **개발일기 시스템 인프라 구축**:
   * **의사결정**: 에이전트의 개발 산출물 추적을 극대화하기 위해 매일 밤 11시(23:00)에 작업 내역(Git, Chat)을 모아 개발일기(`daily_events.md`)와 마일스톤 진척 변화(`milestone_progress.md`)를 누적 갱신하는 에이전트 전용 크론 스케줄러를 가동했습니다.
   * **지침 반영**: [`AGENTS.md`](file:///Users/thomas/Documents/UC-IACF/AGENTS.md)의 신규 지침으로 추가 및 등록 완료.
+* **조직·사업 맵 화면 설계 및 연결선 정렬**:
+  * **의사결정**: 대시보드 내의 탭 전환 기능을 활성화하고, 계층 관계가 한눈에 들어오는 가로/세로 격자 직선 트리를 구축했습니다. 선이 끊어지는 오류를 원천 차단하기 위해 Flexbox 가상 요소 분할 기법을 표준 스타일로 정립했습니다.
+  * **산출물**:
+    * 조직도 컴포넌트: [`components/org-map.tsx`](file:///Users/thomas/Documents/UC-IACF/components/org-map.tsx)
+    * 스타일 정의: [`app/globals.css`](file:///Users/thomas/Documents/UC-IACF/app/globals.css) (직선 정렬 리뉴얼)
+* **새로고침 상태 보존 매커니즘 도입**:
+  * **의사결정**: 브라우저 새로고침 시 탭 상태 유실을 방지하고 Next.js SSR 환경의 Hydration Mismatch를 막기 위해 클라이언트 마운트 동기화(`localStorage` + `useEffect`) 패턴을 도입하여 UX(사용자 경험)를 극대화했습니다.
