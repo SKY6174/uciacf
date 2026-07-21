@@ -306,30 +306,135 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 1800px; /* 3개 대형 지부의 균형 배치를 위해 최소 너비를 1800px로 조절 */
+  min-width: 1650px; /* 메인기둥(1020px) + 우측 스트림(500px) 조화를 위해 1650px로 최적화 */
   margin: 0 auto;
   position: relative;
 }
 
 /* ==========================================================================
-   [핵심] 표준 CSS 트리 구조 연결선 공식
+   [핵심] 3번 피드백 반영: 단장 - 부단장 정중앙 수직 일렬 정렬 및 우측 분기 레이아웃
    ========================================================================== */
 
 /* 트리 전체 루트 래퍼 */
 .org-tree-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; /* 왼쪽 정중앙 기둥 기준으로 정렬 */
+  position: relative;
   width: 100%;
 }
 
-/* 개별 노드 래퍼 */
+/* 1단계 단장 노드 래퍼: 부단장의 6개 부서 전체 폭(1020px)과 폭을 일치시켜 정중앙 축 완성 */
 .org-tree-node-wrapper {
   display: flex;
   justify-content: center;
+  width: 1020px;
   position: relative;
   z-index: 10;
 }
+
+/* 단장 ➡️ 부단장 바로 아래로 곧게 떨어지는 수직 직통선 */
+.org-l1-l2-direct-line {
+  position: relative;
+  left: 510px; /* 1020px의 절반 지점 */
+  width: 2px;
+  height: 64px; /* 단장-부단장 간격 64px로 대폭 확장 */
+  background-color: var(--line);
+  z-index: 1;
+}
+
+/* L2 기둥과 우측 스트림을 감싸는 컨테이너 */
+.org-l2-flex-container {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  width: 100%;
+}
+
+/* 왼쪽 메인 기둥: 부단장 지부 전체 (너비 1020px 고정) */
+.org-l2-main-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 1020px;
+  position: relative;
+}
+
+/* 우측 분기 스트림: 본부장 및 국책사업단 영역 */
+.org-l2-right-stream {
+  position: absolute;
+  left: 1040px; /* 메인기둥(1020px) + 20px 간격 */
+  top: 0; /* 부단장 노드와 수평 정렬을 위해 0 위치 적용 */
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 우측 분기 카드들을 나열하는 래퍼 */
+.org-l2-right-cols-wrapper {
+  display: flex;
+  gap: 40px;
+  position: relative;
+  padding-top: 24px; /* 수평선 아래로 꺾여 들어오는 여백 */
+}
+
+.org-l2-right-branch-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* ==========================================================================
+   수평/수직 분기선 및 교량선 스타일 (점선 포함)
+   ========================================================================== */
+
+/* 단장-부단장 직통선(중간 24px 지점)에서 우측 본부장/국책사업단으로 뻗어나가는 가로선 */
+.org-l2-horizontal-bridge {
+  position: absolute;
+  top: 0; /* 우측 스트림 상단(부단장 상단과 수평) */
+  left: -530px; /* 부단장 중심축(510px)까지 닿도록 오프셋 계산 (1040px - 510px = 530px) */
+  width: 700px; /* 국책사업단까지 충분히 연결되는 가로 길이 */
+  height: 2px;
+  background-color: var(--line);
+  z-index: 1;
+}
+
+/* 우측 스트림 각 노드(본부장, 국책사업단)에서 위로 솟구쳐 수평 브릿지와 만나는 수직선 */
+.org-l2-right-branch-col::before {
+  content: "";
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  width: 2px;
+  height: 24px;
+  background-color: var(--line);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* 국책사업단(점선 지부)으로 가는 수평선 & 수직선 점선 오버라이드 */
+.org-l2-right-branch-col.dashed-branch-r::before {
+  background-color: transparent !important;
+  border-left: 2px dashed rgba(21, 143, 143, 0.6) !important;
+  width: 0 !important;
+}
+
+/* 본부장 ➡️ 국책사업단 사이의 가로 브릿지 구간을 점선화하기 위해 bridge 우측을 투명화하고 가상요소 점선 덧씌움 */
+.org-l2-right-branch-col.dashed-branch-r::after {
+  content: "";
+  position: absolute;
+  top: -24px;
+  left: -200px; /* 본부장 중심축 부근에서 시작 */
+  width: 200px; /* 본부장-국책사업단 간격 */
+  height: 2px;
+  border-top: 2px dashed rgba(21, 143, 143, 0.6);
+  z-index: 2;
+}
+
+/* ==========================================================================
+   L3 이하 자식 노드 연결선 표준 공식
+   ========================================================================== */
 
 /* 자식들을 나열하는 가로 행 */
 .org-children-row {
@@ -338,11 +443,6 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   position: relative;
   padding-top: 24px; /* 부모 수직선이 가로선에 닿기 위한 상단 마진 */
   width: 100%;
-}
-
-/* 3번 피드백: 단장과 하위 리더 사이의 수직 간격을 약 2.5배(64px)로 대폭 넓힙니다. */
-.org-children-row.l1-children-row {
-  padding-top: 64px !important;
 }
 
 /* 부모 노드 아래로 수평선까지 내려가는 수직선 */
@@ -355,10 +455,6 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   background-color: var(--line);
   transform: translateX(-50%);
   z-index: 1;
-}
-
-.l1-children-row > .org-parent-connector {
-  height: 64px !important;
 }
 
 /* 개별 자식 열 (Column) */
@@ -384,11 +480,6 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   z-index: 1;
 }
 
-.l1-children-row > .org-child-col::before {
-  top: -64px !important;
-  height: 64px !important;
-}
-
 /* 자식 열들의 머리 위를 가로지르는 수평 가로선 */
 .org-child-col::after {
   content: "";
@@ -399,10 +490,6 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   height: 2px;
   background-color: var(--line);
   z-index: 1;
-}
-
-.l1-children-row > .org-child-col::after {
-  top: -64px !important;
 }
 
 /* 첫 번째 자식의 왼쪽 가로선 제거 */
@@ -416,28 +503,9 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   width: 50%;
 }
 
-/* 외동 자식인 경우 가로 연결선 제거 */
+/* 외동 자식인 경우 가로 연결선 제거 (2번 피드백: 본부장 아래 1:1 수직 결합 시 자동으로 가로선 지워짐) */
 .org-child-col:only-child::after {
   display: none;
-}
-
-/* ==========================================================================
-   4번 피드백: 국책사업단 (L2) - 단장과의 점선(Dashed) 연결선 구현
-   ========================================================================== */
-
-/* 국책사업단 수직 연결선을 점선으로 오버라이드 */
-.org-child-col.dashed-branch::before {
-  background-color: transparent !important;
-  border-left: 2px dashed rgba(21, 143, 143, 0.6) !important;
-  width: 0 !important;
-  transform: translateX(-50%);
-}
-
-/* 본부장 ➡️ 국책사업단 구간의 수평 가로선을 점선으로 오버라이드 */
-.org-child-col.dashed-branch::after {
-  background-color: transparent !important;
-  border-top: 2px dashed rgba(21, 143, 143, 0.6) !important;
-  height: 0 !important;
 }
 
 /* ==========================================================================
@@ -450,7 +518,7 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   flex-direction: column;
   align-items: center;
   width: 100%;
-  /* 2번 피드백: 상하관계가 아닌 동일 범주의 기관이므로 수직선을 없애고 카드 간격을 8px로 좁힙니다. */
+  /* 상하관계가 아닌 동일 범주의 기관이므로 수직선을 없애고 카드 간격을 8px로 좁힙니다. */
   gap: 8px;
 }
 
@@ -530,10 +598,10 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
 
 .org-node h6 {
   margin: 0;
-  font-size: 10px;
+  font-size: 9.5px; /* 1번 피드백: 카드 크기 압축을 위해 소폭 축소 */
   font-weight: 600;
   color: var(--ink);
-  line-height: 1.4; /* 1번 피드백: 개행 적용에 맞춰 넉넉한 텍스트 줄간격 확보 */
+  line-height: 1.25; /* 줄간격 압축 */
 }
 
 .node-sub {
@@ -585,9 +653,10 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   position: relative;
 }
 
+/* 1번 피드백: 급식지원센터 카드 높이를 이전 대비 절반 수준으로 컴팩트하게 다이어트 */
 .parallel-list-node {
   width: 140px;
-  padding: 8px 10px;
+  padding: 4px 8px; /* 상하 여백 4px로 슬림하게 축소 */
   background: white;
   border: 1px solid #edf0f4;
   border-radius: 6px;
@@ -652,5 +721,6 @@ footer { display: flex; justify-content: space-between; padding: 18px 2px 2px; c
   font-size: 13px;
   color: var(--muted);
 }
+
 
 
