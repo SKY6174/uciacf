@@ -28,7 +28,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { OrgMap } from "./org-map";
 
 type Icon = typeof LayoutDashboard;
@@ -130,6 +130,22 @@ export function DashboardShell() {
   const [tableView, setTableView] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
+  // 컴포넌트 마운트 시 localStorage에 저장된 탭 정보를 확인해 탭을 동기화합니다.
+  // Next.js SSR과 Hydration Mismatch를 방지하기 위해 useEffect 내부에서 브라우저 API를 안전하게 실행합니다.
+  useEffect(() => {
+    const savedTab = localStorage.getItem("activeTab");
+    if (savedTab && NAV_ITEMS.some((item) => item.label === savedTab)) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+
+  // 사이드바 메뉴 클릭 시 탭 상태를 변경하고, 브라우저가 상태를 기억할 수 있도록 localStorage에 보관합니다.
+  const handleTabChange = (tabLabel: string) => {
+    setActiveTab(tabLabel);
+    localStorage.setItem("activeTab", tabLabel);
+    setSidebarOpen(false);
+  };
+
   const factor = FILTER_FACTORS[year];
   const summary = useMemo(
     () => ({
@@ -169,10 +185,7 @@ export function DashboardShell() {
               key={item.label}
               item={item}
               active={item.label === activeTab}
-              onClick={() => {
-                setActiveTab(item.label);
-                setSidebarOpen(false);
-              }}
+              onClick={() => handleTabChange(item.label)}
             />
           ))}
           <p className="nav-label nav-section">WORKSPACE</p>
@@ -181,10 +194,7 @@ export function DashboardShell() {
               key={item.label}
               item={item}
               active={item.label === activeTab}
-              onClick={() => {
-                setActiveTab(item.label);
-                setSidebarOpen(false);
-              }}
+              onClick={() => handleTabChange(item.label)}
             />
           ))}
         </nav>
