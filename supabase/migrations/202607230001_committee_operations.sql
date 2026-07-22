@@ -246,6 +246,15 @@ alter table public.committee_analysis_runs enable row level security;
 alter table public.committee_reports enable row level security;
 alter table public.committee_audit_logs enable row level security;
 
+drop policy if exists committees_owner_all on public.committees;
+drop policy if exists committee_members_owner_read on public.committee_members;
+drop policy if exists committee_agendas_owner_all on public.committee_agendas;
+drop policy if exists committee_documents_owner_read on public.committee_documents;
+drop policy if exists committee_reviews_owner_read on public.committee_reviews;
+drop policy if exists committee_signatures_owner_read on public.committee_signatures;
+drop policy if exists committee_analysis_owner_read on public.committee_analysis_runs;
+drop policy if exists committee_reports_owner_read on public.committee_reports;
+drop policy if exists committee_audit_owner_read on public.committee_audit_logs;
 create policy committees_owner_all on public.committees for all to authenticated
 using (created_by = auth.uid()) with check (created_by = auth.uid());
 create policy committee_members_owner_read on public.committee_members for select to authenticated
@@ -265,6 +274,8 @@ using (public.is_committee_owner(committee_id));
 create policy committee_audit_owner_read on public.committee_audit_logs for select to authenticated
 using (public.is_committee_owner(committee_id));
 
+drop policy if exists meeting_docs_owner_insert on storage.objects;
+drop policy if exists meeting_docs_owner_select on storage.objects;
 create policy meeting_docs_owner_insert on storage.objects for insert to authenticated
 with check (
   bucket_id = 'meeting_docs' and exists (
@@ -281,4 +292,3 @@ using (
 );
 
 revoke insert, update, delete on public.committee_audit_logs from anon, authenticated;
-

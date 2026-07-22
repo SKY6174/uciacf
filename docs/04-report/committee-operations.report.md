@@ -1,17 +1,19 @@
 # 위원회 운영 시스템 구현 보고서
 
-> 작성일: 2026-07-23 | 범위: 개발/스테이징 MVP | 상태: Code complete, deployment gate pending
+> 작성일: 2026-07-23 | 범위: 개발/스테이징 MVP v1.1 | 상태: Production deployment ready, operational data gate pending
 
 ## 결과
 
 대시보드의 `회의·위원회` 메뉴에 관리자 워크스페이스를 추가하고, `/committee/login`과 `/committee`에 외부 위원 전용 심의 흐름을 구현했다. Supabase migration, private Storage, 제한 세션, signed URL, 심의/서명, 참여현황, 선택적 AI 분석, 한글 PDF 보고서 생성이 하나의 추적 가능한 흐름으로 연결된다.
 
+v1.1에서는 1~2년 단위의 `위원회 구성`과 개별 `위원회 운영`을 분리했다. 임기별 명단은 반복 사용하고, 인사변경 시 기존 위원의 유효기간 종료와 후임자 추가를 한 트랜잭션으로 기록한다. 운영 회차는 개최일 기준 명단을 스냅샷으로 확정하므로 이후 구성 변경이 과거 심의·서명 증적에 영향을 주지 않는다.
+
 ## 주요 산출물
 
 - 계획/설계: `docs/01-plan/features/committee-operations.plan.md`, `docs/02-design/features/committee-operations.design.md`
-- DB/RLS/Storage: `supabase/migrations/202607230001_committee_operations.sql`
+- DB/RLS/Storage: `supabase/migrations/202607230001_committee_operations.sql`, `202607230002_committee_compositions.sql`
 - DB 검증: `supabase/tests/committee_rls.sql`
-- 관리자 UI: `components/committee/committee-admin.tsx`
+- 관리자 UI: `components/committee/committee-admin.tsx`, `committee-composition-manager.tsx`
 - 위원 UI: `components/committee/committee-workspace.tsx`, `app/committee/*`
 - 서버 API: `app/api/committees/**`, `app/api/committee-member/**`
 - PDF: `lib/committee/report.ts`, `assets/fonts/NotoSansCJKkr-Regular.otf`
@@ -28,6 +30,8 @@
 - 심의 최종제출 잠금, 서명 스냅샷, append-only 감사 이벤트
 - service-role과 OpenAI 키는 서버 환경변수만 사용
 - AI에는 이름·이메일·원문 PDF가 아닌 비식별 집계만 전달
+- 구성원 교체는 기존 행을 삭제하지 않고 종료일·후임 참조·인사명령 근거와 함께 보존
+- 장기 구성 마스터에는 접근코드를 저장하지 않고 운영 회차마다 별도 해시 발급
 
 ## AI 분석
 
@@ -40,9 +44,12 @@
 | ESLint | 통과 |
 | TypeScript | 통과 |
 | Next.js production build (`--webpack`) | 통과 |
+| Supabase remote migration | `202607230001`, `202607230002` 적용 확인 |
+| Vercel Production | Ready, `https://uc-iacf.vercel.app` alias 반영 |
 | HTTP smoke | `/` 200, `/committee/login` 200, 비인증 workspace 401 |
 | PDF | A4/한글/푸터/잘림 없음, 약 13MB |
-| 설계 일치율 | 개발/스테이징 범위 91% |
+| 설계 일치율 | v1.1 구성/운영 분리 범위 100% |
+| pgTAP | 정의 갱신, 로컬 Docker daemon 부재로 실행 보류 |
 
 ## 배포 전 실행 순서
 

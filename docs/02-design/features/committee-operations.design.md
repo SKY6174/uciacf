@@ -1,6 +1,6 @@
 # 위원회 운영 시스템 상세 설계
 
-> 버전: 1.0.0 | 작성일: 2026-07-23 | 상태: Approved for development/staging implementation
+> 버전: 1.1.0 | 작성일: 2026-07-23 | 상태: Approved for development/staging implementation
 > 계획: [committee-operations.plan.md](../../01-plan/features/committee-operations.plan.md)
 
 ## 1. 설계 목표
@@ -9,6 +9,8 @@
 - PDF 원문 접근은 DB 권한과 동일하게 통제하고 public Storage URL을 사용하지 않는다.
 - 위원은 대학 계정이 없어도 위원별 접근코드로 제한된 위원회에만 접근한다.
 - 집계·AI 요약·보고서의 모든 결과를 의안과 제출 데이터까지 추적한다.
+- 1~2년 단위의 위원회 구성과 개별 운영 회차를 분리하고, 개최일 기준 유효 명단을 재사용한다.
+- 인사명령에 따른 위원 교체는 기존 임명 행을 종료하고 새 임명 행을 추가해 과거 명단을 보존한다.
 
 ## 2. 아키텍처와 신뢰 경계
 
@@ -52,8 +54,10 @@ flowchart LR
 
 | 테이블 | 주요 필드 | 규칙 |
 |---|---|---|
-| `committees` | `code`, `name`, `committee_type`, `owner_org_id`, `status`, `meeting_at`, `security_notice` | 코드 유일, draft/open/closed/reported |
-| `committee_members` | `committee_id`, `member_code`, `name`, `email`, `role`, `access_code_hash`, `status` | 위원회 내 코드 유일, chair/member/secretary |
+| `committee_compositions` | `code`, `name`, `committee_type`, `term_start`, `term_end`, `status`, `created_by` | 1~2년 임기 단위 구성 마스터 |
+| `committee_composition_members` | `composition_id`, `member_code`, `name`, `role`, `valid_from`, `valid_to`, `predecessor_id`, `appointment_reference` | 구성원 임명 이력, 기존 행 덮어쓰기 금지 |
+| `committees` | `composition_id`, `code`, `name`, `committee_type`, `owner_org_id`, `status`, `meeting_at`, `security_notice` | 구성 마스터를 참조하는 개별 운영 회차 |
+| `committee_members` | `committee_id`, `composition_member_id`, `member_code`, `name`, `email`, `role`, `access_code_hash`, `status` | 회차 생성 시 확정한 명단 스냅샷 |
 | `committee_agendas` | `committee_id`, `agenda_no`, `title`, `description`, `decision_type`, `status` | 순번 유일 |
 | `committee_documents` | `agenda_id`, `title`, `bucket_id`, `storage_path`, `mime_type`, `size_bytes`, `sha256` | PDF만, 원본명 별도 보존 |
 | `committee_member_sessions` | `member_id`, `token_hash`, `expires_at`, `last_seen_at`, `revoked_at` | 토큰 원문 저장 금지 |
@@ -73,11 +77,20 @@ flowchart LR
 분석: generated -> reviewed -> approved 또는 rejected
 ```
 
-### 3.3 삭제와 보존
+### 3.3 구성과 운영 회차 분리
+
+- 위원회 구성은 임기 시작일과 종료일을 갖는 독립 마스터이며 여러 운영 회차에서 재사용한다.
+- 구성원 교체 시 기존 행의 `valid_to`와 `status=replaced`를 기록하고, `predecessor_id`를 가진 새 행을 추가한다.
+- 운영 회차 생성 시 `meeting_at` 날짜에 유효한 구성원만 조회하여 `committee_members`에 이름·역할·이메일을 복사한다.
+- 회차 스냅샷은 이후 구성원 인사변경의 영향을 받지 않는다.
+- 접근 보안코드는 장기 구성 마스터에 저장하지 않고 운영 회차마다 새로 설정하며 해시만 보관한다.
+
+### 3.4 삭제와 보존
 
 - 제출 심의, 서명, 보고서는 물리 삭제하지 않는다.
 - 위원 개인정보는 보존정책 확정 후 파기 작업을 연결한다. MVP에서는 비활성화만 지원한다.
 - 문서 교체는 기존 Storage object 삭제가 아니라 새 document/version 행을 생성한다.
+- 구성원 교체는 물리 삭제나 기존 행 수정으로 대체하지 않고 유효기간 종료+후임 행 추가로 관리한다.
 
 ## 4. 권한/RLS 설계
 
@@ -105,7 +118,9 @@ flowchart LR
 
 | Method | 경로 | 인증 | 목적 |
 |---|---|---|---|
-| `POST` | `/api/committees` | Supabase 관리자 | 위원회+위원+의안 생성 |
+| `GET/POST` | `/api/committee-compositions` | Supabase 관리자 | 임기별 위원회 구성·명단 조회/생성 |
+| `POST` | `/api/committee-compositions/[id]/members` | Supabase 관리자 | 위원 추가 또는 인사명령에 따른 교체 |
+| `POST` | `/api/committees` | Supabase 관리자 | 구성 명단을 불러와 운영 회차+위원 스냅샷+의안 생성 |
 | `POST` | `/api/committees/[id]/documents` | Supabase 관리자 | PDF 검증·Storage 업로드·메타데이터 생성 |
 | `GET` | `/api/committees/[id]/overview` | Supabase 관리자 | 참여현황·집계·분석 조회 |
 | `POST` | `/api/committee-member/login` | 공개+rate limit | 위원 접근코드 검증·쿠키 발급 |
@@ -123,9 +138,10 @@ flowchart LR
 
 ### 6.1 관리자 워크스페이스
 
+- 위원회 구성 영역: 임기별 구성 목록, 현재 유효 명단, 구성 등록, 개별 위원 인사변경
 - 상단: 위원회 수, 진행 중, 평균 참여율, 서명 완료율
 - 위원회 목록: 종류/일시/상태/의안/위원/진행률
-- 생성 패널: 기본정보 -> 위원 구성 -> 의안 -> PDF 업로드의 단계형 폼
+- 운영 생성 패널: 기본정보 -> 구성 명단 선택/불러오기 -> 회차별 보안코드 -> 의안 -> PDF 업로드
 - 상세: 참여현황 테이블(미접속/자료열람/심의완료/서명완료), 의안별 표결, AI 분석, 보고서 생성
 
 ### 6.2 위원 페이지
@@ -209,3 +225,5 @@ supabase/tests/committee_rls.sql
 | COM-003 | 심의/서명은 append-only 증적과 스냅샷 보존 | Accepted for staging |
 | COM-004 | AI는 비식별 집계만 사용하고 사람 승인 전 초안 | Accepted for staging |
 | COM-005 | MVP 서명은 공인전자서명이 아닌 감사 가능한 일반 전자서명 | Accepted for staging |
+| COM-006 | 임기별 구성은 유효기간 이력으로 관리하고 운영 회차에는 명단 스냅샷을 복사 | Accepted for staging |
+| COM-007 | 구성 마스터에는 접근코드를 저장하지 않고 운영 회차마다 별도 발급 | Accepted for staging |

@@ -1,8 +1,10 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(10);
+select plan(12);
 
 select has_table('public', 'committees', 'committees table exists');
+select has_table('public', 'committee_compositions', 'committee compositions table exists');
+select has_table('public', 'committee_composition_members', 'composition member history table exists');
 select has_table('public', 'committee_members', 'committee_members table exists');
 select has_table('public', 'committee_documents', 'committee_documents table exists');
 select has_table('public', 'committee_reviews', 'committee_reviews table exists');
