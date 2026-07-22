@@ -73,6 +73,7 @@ export function CommitteeAdmin() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [adminLoginError, setAdminLoginError] = useState("");
 
   const stats = useMemo(() => ({
     total: items.length,
@@ -94,7 +95,7 @@ export function CommitteeAdmin() {
   }, []);
 
   async function loginAdmin(event: FormEvent) {
-    event.preventDefault(); setBusy(true); setMessage("");
+    event.preventDefault(); setBusy(true); setMessage(""); setAdminLoginError("");
     try {
       const client = browserSupabase();
       if (!client) throw new Error("Supabase 공개 환경변수가 설정되지 않았습니다.");
@@ -108,7 +109,7 @@ export function CommitteeAdmin() {
         if (response.ok) setItems(payload.data?.length ? payload.data : []);
       }
       setMessage("Supabase 관리자 인증이 완료되었습니다.");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "로그인하지 못했습니다."); }
+    } catch (error) { setAdminLoginError(error instanceof Error ? error.message : "로그인하지 못했습니다."); }
     finally { setBusy(false); }
   }
 
@@ -218,7 +219,7 @@ export function CommitteeAdmin() {
           <div className="modal-actions"><button type="button" onClick={() => setShowCreate(false)}>취소</button><button className="primary" disabled={busy}>{busy ? <Loader2 className="spin" size={17} /> : <FileText size={17} />}위원회 생성 및 자료 등록</button></div>
         </form>
       </div></div>}
-      {showAdminLogin && <div className="committee-modal-backdrop" role="presentation"><div className="admin-login-modal" role="dialog" aria-modal="true" aria-labelledby="admin-login-title"><button className="admin-login-close" aria-label="닫기" onClick={() => setShowAdminLogin(false)}><X size={19} /></button><span className="login-lock"><LockKeyhole size={22} /></span><small>SUPABASE AUTH</small><h2 id="admin-login-title">위원회 관리자 로그인</h2><p>Supabase Auth에 등록된 교직원 이메일 계정으로 로그인하세요.</p><form onSubmit={loginAdmin}><label><span>이메일</span><input required type="email" autoComplete="username" value={adminEmail} onChange={(event) => setAdminEmail(event.target.value)} /></label><label><span>비밀번호</span><input required type="password" autoComplete="current-password" value={adminPassword} onChange={(event) => setAdminPassword(event.target.value)} /></label><button disabled={busy}>{busy ? <Loader2 className="spin" size={16} /> : <ShieldCheck size={16} />}로그인</button></form><div><ShieldCheck size={15} /><span>관리자 API는 access token을 다시 검증하며, 생성한 위원회의 소유자만 관리할 수 있습니다.</span></div></div></div>}
+      {showAdminLogin && <div className="committee-modal-backdrop" role="presentation"><div className="admin-login-modal" role="dialog" aria-modal="true" aria-labelledby="admin-login-title"><button className="admin-login-close" aria-label="닫기" onClick={() => setShowAdminLogin(false)}><X size={19} /></button><span className="login-lock"><LockKeyhole size={22} /></span><small>SUPABASE AUTH</small><h2 id="admin-login-title">위원회 관리자 로그인</h2><p>Supabase Auth에 등록된 교직원 이메일 계정으로 로그인하세요.</p>{adminLoginError && <div className="login-error" role="alert">{adminLoginError}</div>}<form onSubmit={loginAdmin}><label><span>이메일</span><input required type="email" autoComplete="username" value={adminEmail} onChange={(event) => setAdminEmail(event.target.value)} /></label><label><span>비밀번호</span><input required type="password" autoComplete="current-password" value={adminPassword} onChange={(event) => setAdminPassword(event.target.value)} /></label><button disabled={busy}>{busy ? <Loader2 className="spin" size={16} /> : <ShieldCheck size={16} />}로그인</button></form><div><ShieldCheck size={15} /><span>관리자 API는 access token을 다시 검증하며, 생성한 위원회의 소유자만 관리할 수 있습니다.</span></div></div></div>}
     </section>
   );
 }
