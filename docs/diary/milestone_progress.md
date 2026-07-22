@@ -9,9 +9,24 @@
 | 마일스톤 명 | 목표 요약 | 시작일 | 목표일 | 현재 진척도 | 상태 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **M1. 기초 환경 구성 & DB 연동** | Next.js 초기 셋업, Supabase SDK 연동, 로컬/원격 설정 동기화 | 2026-07-21 | 2026-07-21 | **100%** | **완료** |
-| **M2. 사용자 인증 & 권한(RLS) 구축** | Supabase Auth 연동, 역할 정의, DB RLS 및 Storage 정책 검증 | 2026-07-22 | - | **0%** | 대기 |
+| **M2. 위원회 운영 시스템 & 보안 연동** | 위원회 생성, 외부 위원 보안 페이지, PDF 리딩, 심의/서명, 모니터링/AI/보고서 | 2026-07-22 | 2026-07-23 | **100%** | **완료** |
 | **M3. 성과 지표 & DB 스키마 설계** | Metric Definitions, Values, Audit Log 테이블 설계 및 마이그레이션 | - | - | **0%** | 대기 |
 | **M4. 대시보드 UI & 필터링 시각화** | 대시보드 쉘 화면 구성 및 메트릭 비교 차트 시각화 구현 | - | - | **0%** | 대기 |
+
+---
+
+## 📈 일자별 진척 및 의사결정 기록
+
+### 2026-07-23 (목)
+
+* **마일스톤 M2 (위원회 운영 시스템) 검토 및 완성**:
+  * **내용**: 위원회 생성(위원장/위원/간사 구성, PDF전용 Storage 업로드), 외부 위원 보안 페이지(비밀번호 암호화/잠금/HttpOnly 세션), 300초 시큐어 Signed URL PDF 열람, 의안 심의 및 서명 증적 제출, 참여현황 모니터링, AI 종합 분석 및 PDF 결과보고서 자동 생성의 전체 파이프라인을 검토하고 빌드 검증을 마쳤습니다.
+  * **산출물**:
+    * 데이터베이스 마이그레이션: [`supabase/migrations/202607230001_committee_operations.sql`](file:///Users/thomas/Documents/UC-IACF/supabase/migrations/202607230001_committee_operations.sql)
+    * 외부 위원 로그인/워크스페이스: [`app/committee/login/page.tsx`](file:///Users/thomas/Documents/UC-IACF/app/committee/login/page.tsx), [`components/committee/committee-workspace.tsx`](file:///Users/thomas/Documents/UC-IACF/components/committee/committee-workspace.tsx)
+    * 관리자 위원회 관리 컴포넌트: [`components/committee/committee-admin.tsx`](file:///Users/thomas/Documents/UC-IACF/components/committee/committee-admin.tsx)
+    * API 라우트: [`app/api/committees/route.ts`](file:///Users/thomas/Documents/UC-IACF/app/api/committees/route.ts), [`app/api/committee-member/documents/[id]/open/route.ts`](file:///Users/thomas/Documents/UC-IACF/app/api/committee-member/documents/[id]/open/route.ts) 등 11개 라우트
+
 
 ---
 

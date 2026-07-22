@@ -1,8 +1,9 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-07-20T16:09:41.552Z",
+  "lastUpdated": "2026-07-22T21:20:30.236Z",
   "activeFeatures": [
-    "uc-industry-cooperation-dashboard"
+    "uc-industry-cooperation-dashboard",
+    "committee-operations"
   ],
   "primaryFeature": "uc-industry-cooperation-dashboard",
   "features": {
@@ -44,6 +45,49 @@
         "started": "2026-07-20T14:29:27.368Z",
         "lastUpdated": "2026-07-20T16:09:41.552Z"
       }
+    },
+    "committee-operations": {
+      "phase": "completed",
+      "matchRate": null,
+      "iterationCount": 1,
+      "documents": {},
+      "taskChain": [
+        {
+          "phase": "plan",
+          "status": "completed",
+          "createdAt": "2026-07-22T20:53:37.905Z",
+          "completedAt": "2026-07-22T20:54:12.601Z"
+        },
+        {
+          "phase": "design",
+          "status": "completed",
+          "createdAt": "2026-07-22T20:53:37.905Z",
+          "completedAt": "2026-07-22T20:55:25.424Z"
+        },
+        {
+          "phase": "do",
+          "status": "completed",
+          "createdAt": "2026-07-22T20:53:37.905Z",
+          "completedAt": "2026-07-22T21:16:51.596Z"
+        },
+        {
+          "phase": "check",
+          "status": "completed",
+          "createdAt": "2026-07-22T20:53:37.905Z",
+          "completedAt": "2026-07-22T21:19:30.841Z"
+        },
+        {
+          "phase": "report",
+          "status": "completed",
+          "createdAt": "2026-07-22T20:53:37.905Z",
+          "completedAt": "2026-07-22T21:20:30.236Z"
+        }
+      ],
+      "timestamps": {
+        "started": "2026-07-22T20:53:37.905Z",
+        "lastUpdated": "2026-07-22T21:20:30.236Z"
+      },
+      "completedAt": "2026-07-22T21:20:30.234Z"
     }
   },
   "pipeline": {
@@ -54,7 +98,7 @@
   "session": {
     "startedAt": "2026-07-20T14:29:27.367Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-07-20T16:09:41.552Z"
+    "lastActivity": "2026-07-22T21:20:30.236Z"
   },
   "history": [
     {
@@ -101,6 +145,71 @@
       "phase": "check",
       "nextPhase": "act",
       "timestamp": "2026-07-20T16:09:41.552Z"
+    },
+    {
+      "feature": "committee-operations",
+      "from": "plan",
+      "to": "design",
+      "timestamp": "2026-07-22T20:54:12.597Z"
+    },
+    {
+      "feature": "committee-operations",
+      "action": "phase_complete",
+      "phase": "plan",
+      "nextPhase": "design",
+      "timestamp": "2026-07-22T20:54:12.599Z"
+    },
+    {
+      "feature": "committee-operations",
+      "from": "design",
+      "to": "design",
+      "timestamp": "2026-07-22T20:54:16.116Z"
+    },
+    {
+      "feature": "committee-operations",
+      "from": "design",
+      "to": "do",
+      "timestamp": "2026-07-22T20:55:25.423Z"
+    },
+    {
+      "feature": "committee-operations",
+      "action": "phase_complete",
+      "phase": "design",
+      "nextPhase": "do",
+      "timestamp": "2026-07-22T20:55:25.424Z"
+    },
+    {
+      "feature": "committee-operations",
+      "from": "do",
+      "to": "check",
+      "timestamp": "2026-07-22T21:16:51.594Z"
+    },
+    {
+      "feature": "committee-operations",
+      "action": "phase_complete",
+      "phase": "do",
+      "nextPhase": "check",
+      "timestamp": "2026-07-22T21:16:51.595Z"
+    },
+    {
+      "feature": "committee-operations",
+      "from": "check",
+      "to": "act",
+      "timestamp": "2026-07-22T21:19:30.840Z"
+    },
+    {
+      "feature": "committee-operations",
+      "action": "phase_complete",
+      "phase": "check",
+      "nextPhase": "act",
+      "timestamp": "2026-07-22T21:19:30.841Z"
+    },
+    {
+      "feature": "committee-operations",
+      "action": "phase_complete",
+      "phase": "report",
+      "nextPhase": "completed",
+      "timestamp": "2026-07-22T21:20:30.235Z"
     }
   ]
 }

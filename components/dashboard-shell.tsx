@@ -30,18 +30,20 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { OrgMap } from "./org-map";
+import { CommitteeAdmin } from "./committee/committee-admin";
 
 type Icon = typeof LayoutDashboard;
+type NavEntry = { label: string; view: string; icon: Icon; badge?: string };
 
-const NAV_ITEMS: Array<{ label: string; icon: Icon; badge?: string }> = [
-  { label: "통합 IR 대시보드", icon: LayoutDashboard },
-  { label: "조직·사업 맵", icon: Network },
-  { label: "성과지표", icon: Target, badge: "3" },
-  { label: "예산·재정", icon: CircleDollarSign },
-  { label: "연구·산학협력", icon: Building2 },
-  { label: "회의·위원회", icon: Users },
-  { label: "일정·마감", icon: CalendarDays, badge: "5" },
-  { label: "문서·규정", icon: FileText },
+const NAV_ITEMS: NavEntry[] = [
+  { label: "통합 IR 대시보드", view: "dashboard", icon: LayoutDashboard },
+  { label: "조직·사업 맵", view: "organizations", icon: Network },
+  { label: "성과지표", view: "performance", icon: Target, badge: "3" },
+  { label: "예산·재정", view: "finance", icon: CircleDollarSign },
+  { label: "연구·산학협력", view: "industry", icon: Building2 },
+  { label: "회의·위원회", view: "committee", icon: Users },
+  { label: "일정·마감", view: "calendar", icon: CalendarDays, badge: "5" },
+  { label: "문서·규정", view: "documents", icon: FileText },
 ];
 
 const ORG_DATA = [
@@ -111,10 +113,10 @@ function heatClass(value: number) {
   return "heat heat-risk";
 }
 
-function NavItem({ item, active, onClick }: { item: (typeof NAV_ITEMS)[number]; active: boolean; onClick: () => void }) {
+function NavItem({ item, active, onClick }: { item: NavEntry; active: boolean; onClick: () => void }) {
   const ItemIcon = item.icon;
   return (
-    <button className={`nav-item${active ? " active" : ""}`} onClick={onClick}>
+    <button className={`nav-item${active ? " active" : ""}`} aria-current={active ? "page" : undefined} onClick={onClick}>
       <ItemIcon size={19} strokeWidth={1.9} aria-hidden="true" />
       <span>{item.label}</span>
       {item.badge && <span className="nav-badge">{item.badge}</span>}
@@ -130,19 +132,34 @@ export function DashboardShell() {
   const [tableView, setTableView] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  // 컴포넌트 마운트 시 localStorage에 저장된 탭 정보를 확인해 탭을 동기화합니다.
-  // Next.js SSR과 Hydration Mismatch를 방지하기 위해 useEffect 내부에서 브라우저 API를 안전하게 실행합니다.
+  // URL의 view 값을 우선 사용하고, 기존 사용자는 localStorage 값을 폴백으로 유지합니다.
+  // popstate를 구독해 브라우저 뒤로가기/앞으로가기와 사이드바 선택 상태를 동기화합니다.
   useEffect(() => {
-    const savedTab = localStorage.getItem("activeTab");
-    if (savedTab && NAV_ITEMS.some((item) => item.label === savedTab)) {
-      setActiveTab(savedTab);
-    }
+    const syncFromLocation = () => {
+      const view = new URL(window.location.href).searchParams.get("view");
+      const urlItem = NAV_ITEMS.find((item) => item.view === view);
+      const savedTab = localStorage.getItem("activeTab");
+      const nextTab = urlItem?.label ?? (NAV_ITEMS.some((item) => item.label === savedTab) ? savedTab : null);
+      if (nextTab) setActiveTab(nextTab);
+    };
+    const timer = window.setTimeout(syncFromLocation, 0);
+    window.addEventListener("popstate", syncFromLocation);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("popstate", syncFromLocation);
+    };
   }, []);
 
-  // 사이드바 메뉴 클릭 시 탭 상태를 변경하고, 브라우저가 상태를 기억할 수 있도록 localStorage에 보관합니다.
+  // 사이드바 메뉴를 대시보드 URL과 연결해 새로고침하거나 링크를 공유해도 같은 화면을 엽니다.
   const handleTabChange = (tabLabel: string) => {
     setActiveTab(tabLabel);
     localStorage.setItem("activeTab", tabLabel);
+    const item = NAV_ITEMS.find((navItem) => navItem.label === tabLabel);
+    if (item) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", item.view);
+      window.history.pushState({ view: item.view }, "", url);
+    }
     setSidebarOpen(false);
   };
 
@@ -369,7 +386,9 @@ export function DashboardShell() {
 
           {activeTab === "조직·사업 맵" && <OrgMap />}
 
-          {activeTab !== "통합 IR 대시보드" && activeTab !== "조직·사업 맵" && (
+          {activeTab === "회의·위원회" && <CommitteeAdmin />}
+
+          {activeTab !== "통합 IR 대시보드" && activeTab !== "조직·사업 맵" && activeTab !== "회의·위원회" && (
             <div className="empty-tab-state">
               <h2>{activeTab}</h2>
               <p>해당 서비스는 준비 중입니다.</p>

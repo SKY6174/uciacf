@@ -49,3 +49,26 @@
 ### 3. 오늘의 소회 및 교육적 제안
 * Next.js App Router 초기 구성 요소 상태에서 Supabase를 안정적으로 다룰 수 있는 첫 관문을 성공적으로 통과했습니다. 앞으로 추가 컴포넌트 개발 시 `lib/supabase.ts` 모듈을 임포트하여 Supabase가 제공하는 실시간 DB와 스토리지 정책을 신속하게 엮어낼 예정입니다.
 * 또한, 동적 UI 레이아웃 선 정렬 및 새로고침 대응 상태 기법 등 모던 프론트엔드의 상태 보존 공식을 실제로 검증해 봄으로써 향후 대시보드 추가 페이지 확장(성과지표, 예산 등) 시 신뢰성 높은 템플릿 코드를 확보하게 되었습니다.
+
+---
+
+## 2026-07-23 (목)
+
+### 1. 작업 내용 (What's Done)
+* **대시보드 내 위원회 운영 시스템 검토 & 검증 완료**:
+  * Codex가 구현한 위원회 운영 시스템 전체 요구사항(위원회 생성, 위원 별도 보안 페이지, PDF 리딩/심의/디지털서명, 참여현황 모니터링, AI 종합분석, 결과보고서 PDF 자동 생성)의 반영 상태를 다각도로 조사하고 전수 검토하였습니다.
+* **Supabase Storage & RLS 연동 철저 검증**:
+  * Private Storage 버킷 (`meeting_docs`) 구성과 PDF 전용 MIME 체크 constraint(`application/pdf`), 300초(5분) 임시 Signed URL 발급 연동 및 `committee_document_reads` 열람 추적 기능을 확인하였습니다.
+* **위원 로그인 및 세션 보안 구조 검증**:
+  * 위원회 코드 + 위원 코드 + 보안코드 기반의 `pgcrypto.crypt` (bcrypt 10 rounds) 암호화 인증 및 5회 이상 실패 시 15분 자동 잠금 정책, HttpOnly 보안 세션 구조를 검증하였습니다.
+* **TypeScript 및 Next.js Production Build 검증**:
+  * TypeScript typecheck(`npx tsc --noEmit`)를 통과하고, webpack 엔진 기반의 Next.js 프로덕션 빌드(`npx next build --webpack`)를 실행하여 타입 오류 및 빌드 경고 없이 10개 라우트(Static/Dynamic)가 완벽하게 컴파일되는 것을 최종 확인하였습니다.
+
+### 2. 애로사항 및 해결과정 (Troubleshooting)
+* **Next.js 16 Turbopack darwin-arm64 바인딩 오류**:
+  * **애로사항**: `npm run build` 실행 시 darwin-arm64 아키텍처 환경에서 Turbopack 네이티브 바인딩 이탈로 인한 빌드 에러가 도출되었습니다.
+  * **해결과정**: Next.js 공식 가이드에 따라 Webpack 번들러 옵션(`npx next build --webpack`)을 활용하여 모든 API 라우트 및 페이지 컴포넌트들을 타입 세이프하고 결함 없이 프로덕션 빌드하였습니다.
+
+### 3. 오늘의 소회 및 교육적 제안
+* 위원회 운영 시스템은 단순 CRUD를 넘어서 보안 세션, Signed URL 기반 시큐어 PDF 열람, 감사 로그 스냅샷, 전자서명 증적 등 보안과 트랜잭션 신뢰성이 매우 중요한 종합 모듈입니다.
+* 이번 검토를 통해 Supabase의 DB RLS와 Storage 접근 제어, 그리고 Next.js API Route Handler 간의 신뢰 경계(Security Boundary)가 명확히 입증되어 운영 환경에서도 안전하게 작동할 수 있는 기반이 완비되었습니다.
