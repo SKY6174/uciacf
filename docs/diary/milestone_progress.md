@@ -19,13 +19,19 @@
 
 ### 2026-07-23 (목)
 
-* **마일스톤 M2 (위원회 운영 시스템) 검토 및 완성**:
-  * **내용**: 위원회 생성(위원장/위원/간사 구성, PDF전용 Storage 업로드), 외부 위원 보안 페이지(비밀번호 암호화/잠금/HttpOnly 세션), 300초 시큐어 Signed URL PDF 열람, 의안 심의 및 서명 증적 제출, 참여현황 모니터링, AI 종합 분석 및 PDF 결과보고서 자동 생성의 전체 파이프라인을 검토하고 빌드 검증을 마쳤습니다.
+* **마일스톤 M2 (위원회 운영 시스템 및 구성 관리 v1.1) 완료**:
+  * **내용**:
+    1. **위원회 운영 시스템 MVP**: 위원회 생성(위원장/위원/간사 구성, PDF전용 Storage 업로드), 외부 위원 보안 페이지(비밀번호 암호화/잠금/HttpOnly 세션), 300초 시큐어 Signed URL PDF 열람, 의안 심의 및 서명 증적 제출, 참여현황 모니터링, AI 종합 분석 및 PDF 결과보고서 자동 생성의 파이프라인 완성.
+    2. **대시보드 사이드바 메뉴 연동**: `회의·위원회` 탭 클릭 시 대시보드 쉘과 위원회 관리 컴포넌트(`<CommitteeAdmin />`) 동기화 및 `?view=committee` 브라우저 주소 보존.
+    3. **Vercel Auth 환경변수 트러블슈팅**: Production 환경 내 `NEXT_PUBLIC_SUPABASE_ANON_KEY` 누락 해결 및 모달 UI 로그인 에러 메시지 즉시 노출 로직 추가.
+    4. **위원회 구성(Composition)과 회차(Session) 분리 (v1.1)**: 1~2년 임기 단위 위원 명단 템플릿과 개별 개최 회차를 분리하고 인사 변경 시 이력 보존(`valid_to`, `change_reason`, `predecessor_id`) 및 개최 시점 스냅샷 보존 아키텍처 확립.
   * **산출물**:
-    * 데이터베이스 마이그레이션: [`supabase/migrations/202607230001_committee_operations.sql`](file:///Users/thomas/Documents/UC-IACF/supabase/migrations/202607230001_committee_operations.sql)
-    * 외부 위원 로그인/워크스페이스: [`app/committee/login/page.tsx`](file:///Users/thomas/Documents/UC-IACF/app/committee/login/page.tsx), [`components/committee/committee-workspace.tsx`](file:///Users/thomas/Documents/UC-IACF/components/committee/committee-workspace.tsx)
-    * 관리자 위원회 관리 컴포넌트: [`components/committee/committee-admin.tsx`](file:///Users/thomas/Documents/UC-IACF/components/committee/committee-admin.tsx)
-    * API 라우트: [`app/api/committees/route.ts`](file:///Users/thomas/Documents/UC-IACF/app/api/committees/route.ts), [`app/api/committee-member/documents/[id]/open/route.ts`](file:///Users/thomas/Documents/UC-IACF/app/api/committee-member/documents/[id]/open/route.ts) 등 11개 라우트
+    * DB 마이그레이션: [`supabase/migrations/202607230001_committee_operations.sql`](file:///Users/thomas/Documents/UC-IACF/supabase/migrations/202607230001_committee_operations.sql), [`supabase/migrations/202607230002_committee_compositions.sql`](file:///Users/thomas/Documents/UC-IACF/supabase/migrations/202607230002_committee_compositions.sql)
+    * 구성 관리 UI: [`components/committee/committee-composition-manager.tsx`](file:///Users/thomas/Documents/UC-IACF/components/committee/committee-composition-manager.tsx)
+    * 관리자/외부위원 UI: [`components/committee/committee-admin.tsx`](file:///Users/thomas/Documents/UC-IACF/components/committee/committee-admin.tsx), [`components/committee/committee-workspace.tsx`](file:///Users/thomas/Documents/UC-IACF/components/committee/committee-workspace.tsx)
+    * 대시보드 메인 쉘: [`components/dashboard-shell.tsx`](file:///Users/thomas/Documents/UC-IACF/components/dashboard-shell.tsx)
+    * API 라우트: `app/api/committees/**`, `app/api/committee-member/**`, `app/api/committee-compositions/**`
+
 
 
 ---

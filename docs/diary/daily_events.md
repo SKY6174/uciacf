@@ -55,20 +55,38 @@
 ## 2026-07-23 (목)
 
 ### 1. 작업 내용 (What's Done)
-* **대시보드 내 위원회 운영 시스템 검토 & 검증 완료**:
-  * Codex가 구현한 위원회 운영 시스템 전체 요구사항(위원회 생성, 위원 별도 보안 페이지, PDF 리딩/심의/디지털서명, 참여현황 모니터링, AI 종합분석, 결과보고서 PDF 자동 생성)의 반영 상태를 다각도로 조사하고 전수 검토하였습니다.
-* **Supabase Storage & RLS 연동 철저 검증**:
-  * Private Storage 버킷 (`meeting_docs`) 구성과 PDF 전용 MIME 체크 constraint(`application/pdf`), 300초(5분) 임시 Signed URL 발급 연동 및 `committee_document_reads` 열람 추적 기능을 확인하였습니다.
-* **위원 로그인 및 세션 보안 구조 검증**:
-  * 위원회 코드 + 위원 코드 + 보안코드 기반의 `pgcrypto.crypt` (bcrypt 10 rounds) 암호화 인증 및 5회 이상 실패 시 15분 자동 잠금 정책, HttpOnly 보안 세션 구조를 검증하였습니다.
-* **TypeScript 및 Next.js Production Build 검증**:
-  * TypeScript typecheck(`npx tsc --noEmit`)를 통과하고, webpack 엔진 기반의 Next.js 프로덕션 빌드(`npx next build --webpack`)를 실행하여 타입 오류 및 빌드 경고 없이 10개 라우트(Static/Dynamic)가 완벽하게 컴파일되는 것을 최종 확인하였습니다.
+### 1. 작업 내용 (What's Done)
+* **대시보드 내 위원회 운영 시스템 MVP 구축**:
+  * 위원회 생성(종류, 위원장/위원/간사 역할 지정, 보안코드, 의제 등록) 및 Supabase Private Storage (`meeting_docs`, PDF 전용 검증, 20MB 제한) 연동을 완성했습니다.
+  * 외부 위원 전용 보안 로그인 시스템(`/committee/login`, 위원회코드+위원코드+보안코드 3종 인증, `pgcrypto` 10 rounds bcrypt, 5회 실패 시 15분 자동 잠금, HttpOnly 세션)을 구축했습니다.
+  * 시스템 내 5분(300초) 유효 시큐어 Signed URL 기반 PDF 인앱 리더 및 `committee_document_reads` 열람 추적, 의안별 심의(찬성/반대/기권) 및 필수 의안 완료 후 디지털서명 증적 제출 구조를 작성했습니다.
+  * 실시간 모니터링, 비식별 데이터 기반 AI 종합분석 엔진 및 한글 A4 PDF 결과보고서 자동 생성 기능을 반영했습니다.
+* **대시보드 메뉴 연동 (`dashboard-shell.tsx`)**:
+  * 사이드바 `회의·위원회` 탭 클릭 시 대시보드 본문에 `<CommitteeAdmin />` 시스템이 즉시 표시되도록 연동했습니다.
+  * URL 파라미터(`/?view=committee`) 동기화 및 `popstate` 브라우저 히스토리 이벤트를 처리하여 새로고침이나 직링크 공유 시에도 위원회 관리 화면이 안정적으로 유지되도록 구현했습니다.
+* **Vercel Auth 환경변수 트러블슈팅 및 모달 UI 개선**:
+  * `kysong@uc.ac.kr` 관리자 계정 생성 후 로그인 실패 현상이 발생하여 원인을 정밀 분석했습니다.
+  * 로컬 환경과 달리 Vercel Production 환경변수에 `NEXT_PUBLIC_SUPABASE_ANON_KEY`가 누락되어 클라이언트 브라우저 단에서 Supabase Auth API 호출이 차단되었음을 확인하고 Vercel 대시보드 환경변수 세팅 및 재배포 가이드를 정립했습니다.
+  * 로그인 실패 시 오류 메시지가 모달 뒤에 가려지던 UI 결함을 수정하고 `adminLoginError` 상태를 신설하여 모달 내부에 즉시 경고창이 뜨도록 개선했습니다.
+* **위원회 구성(Composition)과 운영 회차(Session) 구조 분리 (v1.1)**:
+  * 사용자 요구사항에 따라 1~2년 임기의 위원회 구성(위원 명단 템플릿)과 개별 개최 회차 운영을 도메인 차원에서 완전히 분리했습니다.
+  * 신규 마이그레이션 `202607230002_committee_compositions.sql`을 작성하여 `committee_compositions` 및 `committee_composition_members` 테이블을 구축했습니다.
+  * 인사명령 발령 시 기존 위원의 종료일(`valid_to`)과 변경 사유를 기록하고 후임자(`predecessor_id`)를 이력으로 보존하는 링킹 구조를 반영했습니다.
+  * 회차(개최) 생성 시점에 개최일 유효 명단을 자동 스냅샷으로 복사하여 이후 인사변경이 과거 심의·서명 증적에 영향을 주지 않도록 데이터 불변성을 확립했습니다.
 
 ### 2. 애로사항 및 해결과정 (Troubleshooting)
 * **Next.js 16 Turbopack darwin-arm64 바인딩 오류**:
   * **애로사항**: `npm run build` 실행 시 darwin-arm64 아키텍처 환경에서 Turbopack 네이티브 바인딩 이탈로 인한 빌드 에러가 도출되었습니다.
   * **해결과정**: Next.js 공식 가이드에 따라 Webpack 번들러 옵션(`npx next build --webpack`)을 활용하여 모든 API 라우트 및 페이지 컴포넌트들을 타입 세이프하고 결함 없이 프로덕션 빌드하였습니다.
+* **Vercel Production 환경변수 미포함 및 빌드 시점 내장 트러블슈팅**:
+  * **애로사항**: Supabase Auth 계정(`kysong@uc.ac.kr`) 생성 후 Vercel 배포 사이트에서 로그인 시 반응이 없거나 실패하는 현상이 도출되었습니다.
+  * **해결과정**: `NEXT_PUBLIC_*` 접두어가 붙은 환경변수는 Next.js 빌드 시점에 브라우저 번들에 내장되는 특성이 있음을 규명했습니다. Vercel Production 환경에 `NEXT_PUBLIC_SUPABASE_URL` 및 `NEXT_PUBLIC_SUPABASE_ANON_KEY`를 추가한 후 반드시 `Redeploy`를 수행하도록 절차를 정리했습니다.
+* **관리자 로그인 모달 오류 메시지 가림 현상**:
+  * **애로사항**: 로그인 실패 시 경고 메세지가 모달 백드롭 뒤 레이어에 가려져 사용자가 오류 이유를 알 수 없었습니다.
+  * **해결과정**: `committee-admin.tsx` 내에 `adminLoginError` 전용 상태를 신설하고, 모달 `form` 태그 바로 상단에 `{adminLoginError && <div className="login-error">{adminLoginError}</div>}` 알림 상자를 전면 배치하여 사용자 경험을 직관적으로 개선했습니다.
 
 ### 3. 오늘의 소회 및 교육적 제안
 * 위원회 운영 시스템은 단순 CRUD를 넘어서 보안 세션, Signed URL 기반 시큐어 PDF 열람, 감사 로그 스냅샷, 전자서명 증적 등 보안과 트랜잭션 신뢰성이 매우 중요한 종합 모듈입니다.
-* 이번 검토를 통해 Supabase의 DB RLS와 Storage 접근 제어, 그리고 Next.js API Route Handler 간의 신뢰 경계(Security Boundary)가 명확히 입증되어 운영 환경에서도 안전하게 작동할 수 있는 기반이 완비되었습니다.
+* 특히 v1.1 업데이트를 통해 위원회의 1~2년 단위 임기/명단(Composition)과 일회성 회차(Operating Session)를 분리함으로써 인사 이동 시에도 과거 서명 문서가 왜곡되지 않는 견고한 산학협력단 도메인 아키텍처를 완성했습니다.
+* 프론트엔드 환경변수(`NEXT_PUBLIC_*`)와 서버 환경변수(`SUPABASE_SERVICE_ROLE_KEY`)의 역할 차이를 명확히 파악하고 Vercel CI/CD 재배포 절차까지 성공적으로 정립한 뜻깊은 개발 과정이었습니다.
+
